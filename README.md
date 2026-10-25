@@ -1,5 +1,6 @@
-<img width="1864" height="728" alt="image" src="https://github.com/user-attachments/assets/22754a6d-d522-4274-a33d-87573b46aa6e" />
-## YAGOL - Yet Another Game Of Life <br>A submission for UGDC Fall 2026 UMass & Pioneer Valley Game Jam.
+<img width="1864" height="728" alt="image" src="https://github.com/user-attachments/assets/22754a6d-d522-4274-a33d-87573b46aa6e" /> <br>
+## YAGOL - Yet Another Game Of Life.
+A submission for UGDC Fall 2026 UMass & Pioneer Valley Game Jam.
 
 ## Where to play this game?
 The game is playable on itch.io: https://ribosome.itch.io/yagol
