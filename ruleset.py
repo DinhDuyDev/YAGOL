@@ -31,26 +31,30 @@ class GameControl:
         random.randint(0, 255), 
         random.randint(0, 255)
     )
-    normalizedTargetSeed: tuple[int, int, int] = (
-        random.randint(0, 255), 
-        random.randint(0, 255), 
-        random.randint(0, 255)
+    normalizedTargetSeed: tuple[int, int, int] = utility.clampSeq((
+        initialSeed[0] + random.randint(-16, 16),
+        initialSeed[0] + random.randint(-16, 16),
+        initialSeed[0] + random.randint(-16, 16),
+    ), 0, 255
     )
-    guessBioweights: list[utility.numericType] = [0] * 3
     timeStep = 10
     extent = 0.0
 
     def randomizeNormalized(playSound=True):
-        def regenerate():
-            GameControl.normalizedTargetSeed = utility.clampSeq((
-                GameControl.normalizedTargetSeed[0] + random.randint(-64, 64),
-                GameControl.normalizedTargetSeed[1] + random.randint(-64, 64),
-                GameControl.normalizedTargetSeed[2] + random.randint(-64, 64)
-                ), 0, 255
-            )
-        regenerate()
+        GameControl.normalizedTargetSeed = utility.clampSeq((
+            GameControl.normalizedTargetSeed[0] + random.randint(-64, 64),
+            GameControl.normalizedTargetSeed[1] + random.randint(-64, 64),
+            GameControl.normalizedTargetSeed[2] + random.randint(-64, 64)
+            ), 0, 255
+        )
         if playSound: sounds.AllSounds.announcenew.play()
 
+    def initStable():
+        GameControl.randomizeNormalized(False)
+        GameControl.initialSeed = (
+            random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)
+        )
+    killThreshold = 0.6
 
 def getNeighbors(matrix: list[list[cell.Cell]], x: int, y: int) -> tuple[int, list[cell.Cell]]:
     w, h = len(matrix[0]), len(matrix)
@@ -76,7 +80,7 @@ def ruleset(matrix: list[list[cell.Cell]]):
                 cellsAlive += 1
                 weightDelta += utility.arrDiff(matrix[i][j].bio_weights, GameControl.normalizedTargetSeed)
 
-    extent = (weightDelta / cellsAlive) / (255 * 3)
+    extent = ((weightDelta / cellsAlive) / (255 * 3)) ** 0.5
 
     # normal extent
     lifeRange = (2, 3)

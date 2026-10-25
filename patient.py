@@ -5,6 +5,6 @@ import utility
 
 # @section: SUBJECTDEF
 class Subject:
-    health: utility.numericType = 20
+    health: utility.numericType = 98
     def heal(healing_rate: utility.numericType):
         Subject.health += healing_rate

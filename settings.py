@@ -22,3 +22,4 @@ class PREDEF_COLS:
     BLACK   = (0, 0, 0)
     GRAY    = (128, 128, 128)
     GREY    = (128, 128, 128) # in case any british people ever come across here
+    DRKGR   = (96, 96, 96)
