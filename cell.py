@@ -17,4 +17,4 @@ class Cell:
         self.bio_weights = utility.normalize(self.bio_weights)
     
     def cap_bioweight(self):
-        self.bio_weights = [utility.clamp(val, 0, 255) for val in self.bio_weights]
+        self.bio_weights = utility.clampSeq(self.bio_weights, 0, 255)
