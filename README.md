@@ -2,7 +2,7 @@
 ## YAGOL - Yet Another Game Of Life.
 A submission for UGDC Fall 2026 UMass & Pioneer Valley Game Jam.
 
-## Where to play this game?
+## Where can I play this game?
 The game is playable on itch.io: https://ribosome.itch.io/yagol
 
 ## Resources Used:
