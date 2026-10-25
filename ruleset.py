@@ -4,7 +4,10 @@
 import cell
 import utility
 import random
+import sounds
 
+
+# @section: REUSABLES
 neighbors = {
     (-1, -1), (0, -1), (1, -1),
     (-1, 0), (1, 0),
@@ -34,18 +37,20 @@ class GameControl:
         random.randint(0, 255)
     )
     guessBioweights: list[utility.numericType] = [0] * 3
-    timeStep = 3
+    timeStep = 10
     extent = 0.0
 
-    def randomizeNormalized():
+    def randomizeNormalized(playSound=True):
         def regenerate():
-            GameControl.normalizedTargetSeed = (
-                random.randint(0, 255), 
-                random.randint(0, 255), 
-                random.randint(0, 255)
+            GameControl.normalizedTargetSeed = utility.clampSeq((
+                GameControl.normalizedTargetSeed[0] + random.randint(-64, 64),
+                GameControl.normalizedTargetSeed[1] + random.randint(-64, 64),
+                GameControl.normalizedTargetSeed[2] + random.randint(-64, 64)
+                ), 0, 255
             )
         regenerate()
-        while utility.arrDiff(GameControl.normalizedTargetSeed, [128, 128, 128]) < 48 * 3: regenerate()
+        if playSound: sounds.AllSounds.announcenew.play()
+
 
 def getNeighbors(matrix: list[list[cell.Cell]], x: int, y: int) -> tuple[int, list[cell.Cell]]:
     w, h = len(matrix[0]), len(matrix)
@@ -64,19 +69,22 @@ def ruleset(matrix: list[list[cell.Cell]]):
     nextBioWeight: list[list[bool]] = [[matrix[i][j].bio_weights[:] for j in range(w)] for i in range(h)] # bioweights copy
 
     weightDelta = 0
+    cellsAlive = 1
     for i in range(h):
         for j in range(w):
-            weightDelta += (utility.arrDiff(matrix[i][j].bio_weights, GameControl.normalizedTargetSeed)) / (w * h)
+            if matrix[i][j].life_state:
+                cellsAlive += 1
+                weightDelta += utility.arrDiff(matrix[i][j].bio_weights, GameControl.normalizedTargetSeed)
 
-    extent = weightDelta / (255 * 3)
+    extent = (weightDelta / cellsAlive) / (255 * 3)
 
     # normal extent
     lifeRange = (2, 3)
     reproduceThreshold = 3
 
     if extent < 0.2: # very close
-        lifeRange = (5, 7)
-        reproduceThreshold = 6
+        lifeRange = (4, 5)
+        reproduceThreshold = 4
     elif extent < 0.4: # normal - must be a sharp "trough"
         pass
     elif extent < 0.7:

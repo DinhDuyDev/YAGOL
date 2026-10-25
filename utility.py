@@ -25,3 +25,6 @@ def arrDiff(arr1: list[numericType], arr2):
         total += arr1[i] - arr2[i]
 
     return abs(total)
+
+def clampSeq(arr: list[numericType] | tuple[numericType], lower: numericType, upper: numericType):
+    return list(map(lambda x : clamp(x, lower, upper), arr))
