@@ -19,7 +19,7 @@ pygame.font.init()
 screen = pygame.display.set_mode((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT), pygame.RESIZABLE|pygame.DOUBLEBUF|pygame.HWSURFACE|pygame.SCALED|pygame.FULLSCREEN, vsync=1)
 draw_dest = screen.copy()
 debug_font = pygame.font.Font("./fonts/Minecraft.ttf", 15)
-title_font = pygame.font.Font("./fonts/Minecraft.ttf", 45)
+title_font = pygame.font.Font("./fonts/Minecraft.ttf", 80)
 clock = pygame.Clock()
 
 matrix:list[list[cell.Cell]] = [[cell.Cell(j, i) for j in range(settings.VCELLS)] for i in range(settings.VCELLS)]
@@ -40,6 +40,14 @@ def seedLife(matrix: list[list[cell.Cell]]):
         y = random.randint(0, mh - 1)
         matrix[y][x].life_state = True
 
+def lifeCount(matrix: list[list[cell.Cell]]):
+    life_count = 0
+    mw, mh = len(matrix[0]), len(matrix)
+    for i in range(mh):
+        for j in range(mw):
+            if matrix[i][j].life_state: life_count += 1
+    return life_count
+
 # @section: GAMEPLAY SETUP
 class State:
     poison_rects = [pygame.Rect((settings.VCELLS + 2 + i * 8) * settings.TILESIZE, 6 * settings.TILESIZE, settings.TILESIZE * 4, 128) for i in range(3)]
@@ -59,6 +67,7 @@ class State:
     timer = 0
     hasWon = 0 # 0 - in progress, 1 - won, 2 - lose
     playNoise = True
+    allVirusDied = False
 
 
 # Title screen
@@ -87,7 +96,7 @@ def title():
     start_button = title_font.render("START GAME", False, settings.PREDEF_COLS.WHITE)
     for border in [(-1, 0), (0, -1), (0, 1), (1, 0), (0, 0)]:
         if border == (0, 0): start_button = title_font.render("START GAME", False, settings.PREDEF_COLS.RED)
-        button_rect  = start_button.get_rect(center=(settings.SCREEN_WIDTH/2 + border[0] * 4, settings.SCREEN_HEIGHT/2 + border[1] * 4))
+        button_rect  = start_button.get_rect(center=(settings.SCREEN_WIDTH/2 + border[0] * 4, settings.SCREEN_HEIGHT/2 + 64 + border[1] * 4))
         draw_dest.blit(start_button, button_rect)
 
     if button_rect.collidepoint(pygame.mouse.get_pos()):
@@ -111,7 +120,7 @@ def loop():
     mx, my = pygame.mouse.get_pos()
 
     # Check for patient state 
-    if patient.Subject.health >= 100:
+    if patient.Subject.health >= 100 or State.allVirusDied:
         patient.Subject.health = 100
         State.hasWon = 2
         if State.playNoise: 
@@ -132,6 +141,8 @@ def loop():
         else:
             # Play ruleset
             ruleset.ruleset(matrix)
+            c = lifeCount(matrix)
+            if c == 0: State.allVirusDied = True
             # Set next timestep according to how well along you are going
             State.timestep = ruleset.GameControl.timeStep / ((ruleset.GameControl.extent + 0.01) ** 0.75)
             State.seedstep -= 1
@@ -173,6 +184,7 @@ def loop():
         if keys[pygame.K_r]:
             State.hasWon = 0
             resetGame()
+            State.allVirusDied = False
 
     # DRAWING POISON MIXER INDICATOR
     for index, rect in enumerate(State.poison_rects):
@@ -225,14 +237,20 @@ def loop():
     elif State.hasWon == 1:
         text = '''
         You killed him! Great job!
-        Press [R] to start again!
+        Press [R] to try again!
             '''
     else:
         text = '''
         Your patient survived!
         Dangit...
-        Press [R] to start again!
+        Press [R] to try again!
             '''
+        if State.allVirusDied:
+            text = '''
+        Your virus died off!
+        Dangit...
+        Press [R] to try again!
+        '''
     # Instructions
     instruction_text = debug_font.render(
         text, False, settings.PREDEF_COLS.RED
